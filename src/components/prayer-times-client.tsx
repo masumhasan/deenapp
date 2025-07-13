@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Sunrise, Sun, Sunset, Moon, Bell } from "lucide-react";
+import { Clock, Sunrise, Sun, Sunset, Moon, Bell, Loader2, AlertCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,70 +13,165 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const prayerTimesData = [
-  { name: "Fajr", time: "04:32", icon: Sunrise },
-  { name: "Dhuhr", time: "12:58", icon: Sun },
-  { name: "Asr", time: "16:34", icon: Sun },
-  { name: "Maghrib", time: "19:47", icon: Sunset },
-  { name: "Isha", time: "21:18", icon: Moon },
-];
+interface PrayerTime {
+  name: string;
+  time: string;
+  icon: React.ElementType;
+}
 
-const nextPrayerIndex = 2; // Mock: Asr is the next prayer
+const prayerIcons = {
+  Fajr: Sunrise,
+  Dhuhr: Sun,
+  Asr: Sun,
+  Maghrib: Sunset,
+  Isha: Moon,
+  Sunrise: Sunrise,
+};
 
 const formatTo12Hour = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hours12 = hours % 12 || 12; // Convert 0 to 12
+    const hours12 = hours % 12 || 12;
     return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
 };
 
 export default function PrayerTimesClient() {
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
+  const [nextPrayerIndex, setNextPrayerIndex] = useState<number | null>(null);
   const [countdown, setCountdown] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const calculateCountdown = () => {
-      const now = new Date();
-      const nextPrayerTime = prayerTimesData[nextPrayerIndex].time;
-      const [hours, minutes] = nextPrayerTime.split(":").map(Number);
-      
-      const prayerDate = new Date();
-      prayerDate.setHours(hours, minutes, 0, 0);
+    const fetchPrayerTimes = async (latitude: number, longitude: number) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const date = new Date();
+        const response = await fetch(`https://api.aladhan.com/v1/timings/${date.getTime()/1000}?latitude=${latitude}&longitude=${longitude}&method=2`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch prayer times.');
+        }
+        const data = await response.json();
+        const timings = data.data.timings;
 
-      if (now > prayerDate) {
-        // If current time is past today's prayer time, calculate for tomorrow
-        prayerDate.setDate(prayerDate.getDate() + 1);
+        const prayerOrder = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+        const formattedPrayerTimes = prayerOrder.map(name => ({
+          name,
+          time: timings[name].split(' ')[0], // Remove timezone info
+          icon: prayerIcons[name as keyof typeof prayerIcons] || Clock,
+        }));
+        
+        setPrayerTimes(formattedPrayerTimes);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchPrayerTimes(position.coords.latitude, position.coords.longitude);
+        },
+        (err) => {
+          setError("Could not get location. Please allow location access and refresh.");
+          setIsLoading(false);
+        }
+      );
+    } else {
+      setError("Geolocation is not supported by your browser.");
+      setIsLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (prayerTimes.length === 0) return;
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      let nextPrayerIdx = -1;
+
+      // Find the next prayer for today
+      for (let i = 0; i < prayerTimes.length; i++) {
+        const [hours, minutes] = prayerTimes[i].time.split(':').map(Number);
+        const prayerDate = new Date();
+        prayerDate.setHours(hours, minutes, 0, 0);
+        if (prayerDate > now) {
+          nextPrayerIdx = i;
+          break;
+        }
       }
 
-      const diff = prayerDate.getTime() - now.getTime();
+      let nextPrayerTime: Date;
+      if (nextPrayerIdx !== -1) {
+        // Next prayer is today
+        const [hours, minutes] = prayerTimes[nextPrayerIdx].time.split(':').map(Number);
+        nextPrayerTime = new Date();
+        nextPrayerTime.setHours(hours, minutes, 0, 0);
+        setNextPrayerIndex(nextPrayerIdx);
+      } else {
+        // All prayers for today are done, next is Fajr tomorrow
+        nextPrayerIdx = 0;
+        const [hours, minutes] = prayerTimes[0].time.split(':').map(Number);
+        nextPrayerTime = new Date();
+        nextPrayerTime.setDate(nextPrayerTime.getDate() + 1);
+        nextPrayerTime.setHours(hours, minutes, 0, 0);
+        setNextPrayerIndex(0);
+      }
+      
+      const diff = nextPrayerTime.getTime() - now.getTime();
       const h = Math.floor(diff / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const s = Math.floor((diff % (1000 * 60)) / 1000);
 
       setCountdown(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`);
-    };
-
-    const timer = setInterval(calculateCountdown, 1000);
-    calculateCountdown(); // Initial call
+    }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [prayerTimes]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-4 text-lg text-muted-foreground">Fetching prayer times for your location...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+       <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  const nextPrayer = nextPrayerIndex !== null ? prayerTimes[nextPrayerIndex] : null;
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="font-headline text-center text-3xl text-primary">
-            Next Prayer: {prayerTimesData[nextPrayerIndex].name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center">
-          <div className="text-6xl font-bold font-mono text-accent tracking-widest">
-            {countdown}
-          </div>
-          <p className="text-muted-foreground mt-2">until next Salah</p>
-        </CardContent>
-      </Card>
+      {nextPrayer && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="font-headline text-center text-3xl text-primary">
+              Next Prayer: {nextPrayer.name} at {formatTo12Hour(nextPrayer.time)}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center">
+            <div className="text-6xl font-bold font-mono text-accent tracking-widest">
+              {countdown}
+            </div>
+            <p className="text-muted-foreground mt-2">until next Salah</p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -86,7 +181,7 @@ export default function PrayerTimesClient() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
-            {prayerTimesData.map((prayer, index) => (
+            {prayerTimes.map((prayer, index) => (
               <li
                 key={prayer.name}
                 className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
