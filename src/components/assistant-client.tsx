@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Sparkles, Mic, MicOff, Volume2 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   query: z.string().min(10, "Please ask a more detailed question.").max(500),
@@ -31,6 +32,7 @@ export default function AssistantClient() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { t, language } = useLanguage();
+  const { toast } = useToast();
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -59,15 +61,44 @@ export default function AssistantClient() {
 
       recognitionRef.current.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
+        if (event.error === 'not-allowed') {
+            toast({
+                variant: 'destructive',
+                title: 'Microphone Access Denied',
+                description: 'Please allow microphone access in your browser settings to use the voice feature.',
+            });
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Voice Recognition Error',
+                description: 'Could not recognize speech. Please check your connection and try again.',
+            });
+        }
         stopListening();
       };
     }
-  }, [language, form]);
+  }, [language, form, toast]);
 
   const startListening = () => {
     if (recognitionRef.current) {
-      setIsListening(true);
-      recognitionRef.current.start();
+        try {
+            setIsListening(true);
+            recognitionRef.current.start();
+        } catch(e) {
+            console.error(e);
+            setIsListening(false);
+             toast({
+                variant: 'destructive',
+                title: 'Could not start listening',
+                description: 'Another recognition session might be active. Please try again.',
+            });
+        }
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Voice Recognition Not Supported',
+            description: 'Your browser does not support the Web Speech API.',
+        });
     }
   };
 
@@ -215,3 +246,5 @@ export default function AssistantClient() {
     </div>
   );
 }
+
+    
