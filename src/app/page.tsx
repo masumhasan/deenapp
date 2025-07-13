@@ -15,14 +15,19 @@ import {
   Landmark,
   Repeat,
   Sparkles,
-  Compass
+  Compass,
+  BellRing
 } from "lucide-react";
 import RamadanCard from "@/components/ramadan-card";
 import { useLanguage } from "@/context/language-context";
 import NextPrayerCard from "@/components/next-prayer-card";
+import WuduSettingsDialog from "@/components/wudu-settings-dialog";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { t } = useLanguage();
+  const [isWuduSettingsOpen, setIsWuduSettingsOpen] = useState(false);
 
   const featureCards = [
     {
@@ -81,7 +86,14 @@ export default function Home() {
       bgColor: "bg-gradient-to-br from-pink-400 to-rose-500",
       iconColor: "text-white",
     },
-   
+     {
+      title: "Wudu Reminder",
+      description: "Get notified 15 mins before prayer",
+      isDialog: true,
+      icon: BellRing,
+      bgColor: "bg-gradient-to-br from-sky-400 to-blue-500",
+      iconColor: "text-white",
+    },
   ];
 
   return (
@@ -99,28 +111,56 @@ export default function Home() {
       <RamadanCard />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {featureCards.map((feature) => (
-          <Link href={feature.href} key={feature.title} className="group">
-            <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-transform duration-300 ease-in-out bg-card/80">
-              <CardHeader className="flex flex-row items-center gap-4">
-                <div
-                  className={`p-3 rounded-full bg-gradient-to-br ${feature.bgColor}`}
-                >
-                  <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
-                </div>
-                <div>
-                  <CardTitle className="font-headline text-xl text-primary group-hover:text-accent">
-                    {feature.title}
-                  </CardTitle>
-                  <CardDescription className="text-md">
-                    {feature.description}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
+        {featureCards.map((feature) =>
+          feature.isDialog ? (
+            <Button
+              key={feature.title}
+              variant="ghost"
+              className="p-0 m-0 h-full w-full group focus-visible:ring-0 focus-visible:ring-offset-0"
+              onClick={() => setIsWuduSettingsOpen(true)}
+            >
+              <Card className="h-full w-full hover:shadow-xl hover:-translate-y-1 transition-transform duration-300 ease-in-out bg-card/80">
+                <CardHeader className="flex flex-row items-center gap-4 text-left">
+                  <div
+                    className={`p-3 rounded-full bg-gradient-to-br ${feature.bgColor}`}
+                  >
+                    <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
+                  </div>
+                  <div>
+                    <CardTitle className="font-headline text-xl text-primary group-hover:text-accent">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="text-md">
+                      {feature.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            </Button>
+          ) : (
+            <Link href={feature.href!} key={feature.title} className="group">
+              <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-transform duration-300 ease-in-out bg-card/80">
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <div
+                    className={`p-3 rounded-full bg-gradient-to-br ${feature.bgColor}`}
+                  >
+                    <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
+                  </div>
+                  <div>
+                    <CardTitle className="font-headline text-xl text-primary group-hover:text-accent">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="text-md">
+                      {feature.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+          )
+        )}
       </div>
+      <WuduSettingsDialog isOpen={isWuduSettingsOpen} onClose={() => setIsWuduSettingsOpen(false)} />
     </div>
   );
 }
