@@ -31,6 +31,7 @@ const prayerIcons = {
 };
 
 const formatTo12Hour = (time: string) => {
+    if (!time) return "";
     const [hours, minutes] = time.split(':').map(Number);
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const hours12 = hours % 12 || 12;
@@ -43,49 +44,48 @@ export default function PrayerTimesClient() {
   const [countdown, setCountdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState<string | null>(null);
+
 
   useEffect(() => {
-    const fetchPrayerTimes = async (latitude: number, longitude: number) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const date = new Date();
-        const response = await fetch(`https://api.aladhan.com/v1/timings/${date.getTime()/1000}?latitude=${latitude}&longitude=${longitude}&method=2`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch prayer times.');
-        }
-        const data = await response.json();
-        const timings = data.data.timings;
+    const fetchPrayerTimesForIP = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const ipRes = await fetch('http://ip-api.com/json');
+            if (!ipRes.ok) throw new Error("Could not determine your location.");
+            const ipData = await ipRes.json();
+            if (ipData.status !== 'success') {
+                throw new Error("Could not determine your location from IP.");
+            }
+            setLocation(`${ipData.city}, ${ipData.country}`);
+            
+            const { lat, lon } = ipData;
+            const date = new Date();
+            const prayerRes = await fetch(`https://api.aladhan.com/v1/timings/${date.getTime()/1000}?latitude=${lat}&longitude=${lon}&method=2`);
+            if (!prayerRes.ok) {
+                throw new Error('Failed to fetch prayer times.');
+            }
+            const prayerData = await prayerRes.json();
+            const timings = prayerData.data.timings;
 
-        const prayerOrder = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-        const formattedPrayerTimes = prayerOrder.map(name => ({
-          name,
-          time: timings[name].split(' ')[0], // Remove timezone info
-          icon: prayerIcons[name as keyof typeof prayerIcons] || Clock,
-        }));
-        
-        setPrayerTimes(formattedPrayerTimes);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred.");
-      } finally {
-        setIsLoading(false);
-      }
+            const prayerOrder = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+            const formattedPrayerTimes = prayerOrder.map(name => ({
+                name,
+                time: timings[name].split(' ')[0],
+                icon: prayerIcons[name as keyof typeof prayerIcons] || Clock,
+            }));
+            
+            setPrayerTimes(formattedPrayerTimes);
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An unknown error occurred.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          fetchPrayerTimes(position.coords.latitude, position.coords.longitude);
-        },
-        (err) => {
-          setError("Could not get location. Please allow location access and refresh.");
-          setIsLoading(false);
-        }
-      );
-    } else {
-      setError("Geolocation is not supported by your browser.");
-      setIsLoading(false);
-    }
+    fetchPrayerTimesForIP();
   }, []);
   
   useEffect(() => {
@@ -95,7 +95,6 @@ export default function PrayerTimesClient() {
       const now = new Date();
       let nextPrayerIdx = -1;
 
-      // Find the next prayer for today
       for (let i = 0; i < prayerTimes.length; i++) {
         const [hours, minutes] = prayerTimes[i].time.split(':').map(Number);
         const prayerDate = new Date();
@@ -108,13 +107,11 @@ export default function PrayerTimesClient() {
 
       let nextPrayerTime: Date;
       if (nextPrayerIdx !== -1) {
-        // Next prayer is today
         const [hours, minutes] = prayerTimes[nextPrayerIdx].time.split(':').map(Number);
         nextPrayerTime = new Date();
         nextPrayerTime.setHours(hours, minutes, 0, 0);
         setNextPrayerIndex(nextPrayerIdx);
       } else {
-        // All prayers for today are done, next is Fajr tomorrow
         nextPrayerIdx = 0;
         const [hours, minutes] = prayerTimes[0].time.split(':').map(Number);
         nextPrayerTime = new Date();
@@ -174,10 +171,11 @@ export default function PrayerTimesClient() {
       )}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl text-primary">
-            Today's Prayer Times
-          </CardTitle>
+        <CardHeader className="flex flex-row justify-between items-center">
+            <CardTitle className="font-headline text-2xl text-primary">
+                Today's Prayer Times
+            </CardTitle>
+            {location && <p className="text-sm text-muted-foreground">{location}</p>}
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
