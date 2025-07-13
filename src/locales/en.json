@@ -7,6 +7,7 @@
     "tasbih_counter": "Tasbih Counter",
     "hijri_calendar": "Hijri Calendar",
     "ai_assistant": "AI Assistant",
+    "qibla_finder": "Qibla Finder",
     "welcome_to_deenstream": "Welcome to DeenStream",
     "welcome_subtitle": "Your comprehensive guide to an enriched Islamic lifestyle. All your essential tools, in one place.",
     "view_daily_prayer_schedules": "View daily prayer schedules",
@@ -15,6 +16,7 @@
     "track_your_dhikr_and_tasbih": "Track your dhikr and tasbih",
     "follow_the_islamic_calendar": "Follow the Islamic calendar",
     "ask_questions_about_fiqh": "Ask questions about Fiqh",
+    "find_the_direction_of_the_kaaba": "Find the direction of the Kaaba",
     "ramadan_kareem": "Ramadan Kareem",
     "suhoor": "Suhoor",
     "iftar": "Iftar",
@@ -71,5 +73,10 @@
     "dhuhr": "Dhuhr",
     "asr": "Asr",
     "maghrib": "Maghrib",
-    "isha": "Isha"
+    "isha": "Isha",
+    "qibla_finder_description": "Point your device towards the Qibla.",
+    "location_permission_denied": "Location permission denied. Qibla direction cannot be calculated.",
+    "motion_permission_denied": "Motion sensor permission denied. The compass will not work.",
+    "requesting_permissions": "Requesting required permissions...",
+    "try_again": "Try Again"
 }

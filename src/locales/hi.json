@@ -7,6 +7,7 @@
     "tasbih_counter": "तस्बीह काउंटर",
     "hijri_calendar": "हिजरी कैलेंडर",
     "ai_assistant": "एआई सहायक",
+    "qibla_finder": "क़िबला खोजक",
     "welcome_to_deenstream": "दीनस्ट्रीम में आपका स्वागत है",
     "welcome_subtitle": "एक समृद्ध इस्लामी जीवन शैली के लिए आपकी व्यापक मार्गदर्शिका। आपके सभी आवश्यक उपकरण, एक ही स्थान पर।",
     "view_daily_prayer_schedules": "दैनिक नमाज़ का समय देखें",
@@ -15,6 +16,7 @@
     "track_your_dhikr_and_tasbih": "अपने ज़िक्र और तस्बीह को ट्रैक करें",
     "follow_the_islamic_calendar": "इस्लामी कैलेंडर का पालन करें",
     "ask_questions_about_fiqh": "फ़िक़्ह के बारे में प्रश्न पूछें",
+    "find_the_direction_of_the_kaaba": "काबा की दिशा का पता लगाएं",
     "ramadan_kareem": "रमजान करीम",
     "suhoor": "सुहूर",
     "iftar": "इफ्तार",
@@ -71,5 +73,10 @@
     "dhuhr": "धुहर",
     "asr": "असर",
     "maghrib": "मगरिब",
-    "isha": "ईशा"
+    "isha": "ईशा",
+    "qibla_finder_description": "अपने डिवाइस को क़िबला की ओर इंगित करें।",
+    "location_permission_denied": "स्थान की अनुमति अस्वीकृत। क़िबला दिशा की गणना नहीं की जा सकती।",
+    "motion_permission_denied": "मोशन सेंसर की अनुमति अस्वीकृत। कंपास काम नहीं करेगा।",
+    "requesting_permissions": "आवश्यक अनुमतियों का अनुरोध किया जा रहा है...",
+    "try_again": "पुनः प्रयास करें"
 }

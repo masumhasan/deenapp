@@ -7,6 +7,7 @@
     "tasbih_counter": "তাসবিহ কাউন্টার",
     "hijri_calendar": "হিজরি ক্যালেন্ডার",
     "ai_assistant": "এআই সহকারী",
+    "qibla_finder": "কিবলা ফাইন্ডার",
     "welcome_to_deenstream": "দ্বীনস্ট্রিমে স্বাগতম",
     "welcome_subtitle": "আপনার সমৃদ্ধ ইসলামী জীবনধারার জন্য একটি ব্যাপক নির্দেশিকা। আপনার সমস্ত প্রয়োজনীয় সরঞ্জাম, এক জায়গায়।",
     "view_daily_prayer_schedules": "দৈনিক নামাজের সময়সূচী দেখুন",
@@ -15,6 +16,7 @@
     "track_your_dhikr_and_tasbih": "আপনার যিকর ও তাসবিহ ট্র্যাক করুন",
     "follow_the_islamic_calendar": "ইসলামী ক্যালেন্ডার অনুসরণ করুন",
     "ask_questions_about_fiqh": "ফিকহ সম্পর্কে প্রশ্ন জিজ্ঞাসা করুন",
+    "find_the_direction_of_the_kaaba": "কাবার দিক নির্ণয় করুন",
     "ramadan_kareem": "রমজানুল কারীম",
     "suhoor": "সাহরি",
     "iftar": "ইফতার",
@@ -71,5 +73,10 @@
     "dhuhr": "যোহর",
     "asr": "আসর",
     "maghrib": "মাগরিব",
-    "isha": "ইশা"
+    "isha": "ইশা",
+    "qibla_finder_description": "কিবলার দিকে আপনার ডিভাইসটি নির্দেশ করুন।",
+    "location_permission_denied": "অবস্থানের অনুমতি দেওয়া হয়নি। কিবলার দিক নির্ণয় করা যাবে না।",
+    "motion_permission_denied": "মোশন সেন্সরের অনুমতি দেওয়া হয়নি। কম্পাস কাজ করবে না।",
+    "requesting_permissions": "প্রয়োজনীয় অনুমতি অনুরোধ করা হচ্ছে...",
+    "try_again": "আবার চেষ্টা করুন"
 }

@@ -15,6 +15,7 @@ import {
   Landmark,
   Repeat,
   Sparkles,
+  Compass
 } from "lucide-react";
 import RamadanCard from "@/components/ramadan-card";
 import { useLanguage } from "@/context/language-context";
@@ -64,6 +65,14 @@ export default function Home() {
       bgColor: "bg-gradient-to-br from-purple-400 to-purple-600",
       iconColor: "text-white",
     },
+     {
+      title: t('qibla_finder'),
+      description: t('find_the_direction_of_the_kaaba'),
+      href: "/qibla",
+      icon: Compass,
+      bgColor: "bg-gradient-to-br from-teal-400 to-cyan-600",
+      iconColor: "text-white",
+    },
     {
       title: t('ai_assistant'),
       description: t('ask_questions_about_fiqh'),
@@ -72,6 +81,7 @@ export default function Home() {
       bgColor: "bg-gradient-to-br from-pink-400 to-rose-500",
       iconColor: "text-white",
     },
+   
   ];
 
   return (

@@ -15,6 +15,7 @@ import {
   Sparkles,
   Languages,
   MapPin,
+  Compass,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ function NavContent() {
     { href: "/tasbih", label: t('tasbih_counter'), icon: Repeat },
     { href: "/calendar", label: t('hijri_calendar'), icon: Calendar },
     { href: "/assistant", label: t('ai_assistant'), icon: Sparkles },
+    { href: "/qibla", label: t('qibla_finder'), icon: Compass },
   ];
 
   return (
