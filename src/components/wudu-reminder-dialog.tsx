@@ -22,6 +22,8 @@ export default function WuduReminderDialog({ isOpen, onClose }: WuduReminderDial
   const oscillatorRef = useRef<OscillatorNode | null>(null);
 
   const playSound = () => {
+    if (typeof window === 'undefined' || !window.AudioContext) return;
+
     if (!audioRef.current) {
         try {
             audioRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -31,10 +33,7 @@ export default function WuduReminderDialog({ isOpen, onClose }: WuduReminderDial
         }
     }
     
-    // Stop any existing sound
-    if (oscillatorRef.current) {
-        oscillatorRef.current.stop();
-    }
+    stopSound();
     
     const oscillator = audioRef.current.createOscillator();
     const gainNode = audioRef.current.createGain();
@@ -43,11 +42,11 @@ export default function WuduReminderDialog({ isOpen, onClose }: WuduReminderDial
     gainNode.connect(audioRef.current.destination);
 
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(440, audioRef.current.currentTime); // A4 pitch
-    gainNode.gain.setValueAtTime(1, audioRef.current.currentTime);
+    oscillator.frequency.setValueAtTime(440, audioRef.current.currentTime);
+    gainNode.gain.setValueAtTime(0.5, audioRef.current.currentTime);
     
     oscillator.start();
-    oscillator.stop(audioRef.current.currentTime + 1); // Play for 1 second
+    oscillator.stop(audioRef.current.currentTime + 1);
     oscillatorRef.current = oscillator;
   };
 
@@ -59,20 +58,26 @@ export default function WuduReminderDialog({ isOpen, onClose }: WuduReminderDial
   };
 
   useEffect(() => {
+    let soundInterval: NodeJS.Timeout | null = null;
     if (isOpen) {
-      playSound();
-      // Optional: Vibrate for 500ms if supported
+      playSound(); 
+      soundInterval = setInterval(playSound, 2000); 
+
       if ('vibrate' in navigator) {
-        navigator.vibrate(500);
+        navigator.vibrate([500, 200, 500]);
       }
-    } else {
-        stopSound();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      stopSound();
+      if (soundInterval) {
+        clearInterval(soundInterval);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleStop = () => {
-    stopSound();
     onClose();
   };
 

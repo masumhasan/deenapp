@@ -26,6 +26,8 @@ const useWuduReminder = (
   useEffect(() => {
     if (!isReminderEnabled || !location) return;
 
+    let isMounted = true;
+
     const checkPrayerTimes = async () => {
       try {
         const date = new Date();
@@ -55,9 +57,8 @@ const useWuduReminder = (
           if (prayerTime > now) {
             const diffInMinutes = (prayerTime.getTime() - now.getTime()) / (1000 * 60);
             
-            // Check if it's exactly 15 minutes before
             if (Math.round(diffInMinutes) === 15) {
-               setReminderTriggered(true);
+               if(isMounted) setReminderTriggered(true);
             }
             break; 
           }
@@ -66,12 +67,14 @@ const useWuduReminder = (
         console.error("Error in Wudu Reminder check:", error);
       }
     };
-
-    // Check every minute
+    
+    checkPrayerTimes();
     const interval = setInterval(checkPrayerTimes, 60000); 
-    checkPrayerTimes(); 
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    }
   }, [isReminderEnabled, location, setReminderTriggered]);
 };
 
