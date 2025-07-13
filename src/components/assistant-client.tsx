@@ -1,11 +1,12 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { answerFiqhQuery } from "@/ai/flows/answer-fiqh-queries";
+import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Mic, MicOff, Volume2 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 
 const formSchema = z.object({
@@ -27,7 +28,11 @@ const formSchema = z.object({
 export default function AssistantClient() {
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { t } = useLanguage();
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { t, language } = useLanguage();
+  const recognitionRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,15 +41,76 @@ export default function AssistantClient() {
     },
   });
 
+  useEffect(() => {
+    // @ts-ignore
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = language === 'bn' ? 'bn-BD' : language === 'hi' ? 'hi-IN' : 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const spokenText = event.results[0][0].transcript;
+        form.setValue("query", spokenText);
+        stopListening();
+        form.handleSubmit(onSubmit)(); 
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        stopListening();
+      };
+    }
+  }, [language, form]);
+
+  const startListening = () => {
+    if (recognitionRef.current) {
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      setIsListening(false);
+      recognitionRef.current.stop();
+    }
+  };
+
+  const playAudio = async (text: string) => {
+    if (!text) return;
+    setIsSpeaking(true);
+    try {
+      const response = await textToSpeech(text);
+      const audioSrc = response.media;
+      if (audioRef.current) {
+        audioRef.current.src = audioSrc;
+        audioRef.current.play();
+        audioRef.current.onended = () => setIsSpeaking(false);
+      }
+    } catch (error) {
+      console.error("Error generating or playing audio:", error);
+      setIsSpeaking(false);
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setAnswer("");
     try {
       const result = await answerFiqhQuery(values);
       setAnswer(result.answer);
+      if (isListening) { // Auto-play if coming from voice input
+          await playAudio(result.answer);
+      }
     } catch (error) {
       console.error(error);
-      setAnswer("Sorry, I encountered an error. Please try again.");
+      const errorMessage = "Sorry, I encountered an error. Please try again.";
+      setAnswer(errorMessage);
+       if (isListening) {
+          await playAudio(errorMessage);
+       }
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +118,7 @@ export default function AssistantClient() {
 
   return (
     <div className="space-y-6">
+       <audio ref={audioRef} className="hidden" />
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-2xl text-primary">
@@ -69,7 +136,7 @@ export default function AssistantClient() {
                     <FormLabel>{t('your_question_about_fiqh')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder={t('question_placeholder')}
+                        placeholder={isListening ? "Listening..." : t('question_placeholder')}
                         className="resize-none"
                         rows={4}
                         {...field}
@@ -79,19 +146,38 @@ export default function AssistantClient() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('getting_answer')}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {t('ask_assistant')}
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={isLoading || isListening} className="w-full">
+                    {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t('getting_answer')}
+                    </>
+                    ) : (
+                    <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        {t('ask_assistant')}
+                    </>
+                    )}
+                </Button>
+                <Button
+                    type="button"
+                    variant={isListening ? "destructive" : "outline"}
+                    onClick={isListening ? stopListening : startListening}
+                    disabled={isLoading}
+                    className="w-full"
+                >
+                    {isListening ? (
+                        <>
+                            <MicOff className="mr-2 h-4 w-4" /> Stop Listening
+                        </>
+                    ) : (
+                        <>
+                            <Mic className="mr-2 h-4 w-4" /> Start Voice Session
+                        </>
+                    )}
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
@@ -100,9 +186,16 @@ export default function AssistantClient() {
       {(isLoading || answer) && (
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline text-2xl text-primary">
-              {t('answer')}
-            </CardTitle>
+            <div className="flex justify-between items-center">
+                <CardTitle className="font-headline text-2xl text-primary">
+                {t('answer')}
+                </CardTitle>
+                {answer && !isLoading && (
+                    <Button variant="ghost" size="icon" onClick={() => playAudio(answer)} disabled={isSpeaking}>
+                        <Volume2 className={`h-6 w-6 text-accent ${isSpeaking ? 'animate-pulse' : ''}`} />
+                    </Button>
+                )}
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
