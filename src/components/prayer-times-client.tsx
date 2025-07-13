@@ -45,6 +45,7 @@ export default function PrayerTimesClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState<string | null>(null);
+  const [timezone, setTimezone] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function PrayerTimesClient() {
                 throw new Error("Could not determine your location from IP.");
             }
             setLocation(`${ipData.city}, ${ipData.country}`);
+            setTimezone(ipData.timezone);
             
             const { lat, lon } = ipData;
             const date = new Date();
@@ -175,7 +177,12 @@ export default function PrayerTimesClient() {
             <CardTitle className="font-headline text-2xl text-primary">
                 Today's Prayer Times
             </CardTitle>
-            {location && <p className="text-sm text-muted-foreground">{location}</p>}
+            {(location || timezone) && (
+              <div className="text-right">
+                {location && <p className="text-sm text-muted-foreground">{location}</p>}
+                {timezone && <p className="text-xs text-muted-foreground">{timezone.replace(/_/g, " ")}</p>}
+              </div>
+            )}
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
