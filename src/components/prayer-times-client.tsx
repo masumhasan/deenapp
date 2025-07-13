@@ -3,18 +3,11 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Sunrise, Sun, Sunset, Moon, Bell, Loader2, AlertCircle, MapPin } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Clock, Sunrise, Sun, Sunset, Moon, Bell, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/context/language-context";
-import NextPrayerCard from "./next-prayer-card";
+import { useLocation } from "@/context/location-context";
 
 interface PrayerTime {
   name: string;
@@ -31,14 +24,6 @@ const prayerIcons: { [key: string]: React.ElementType } = {
   Sunrise: Sunrise,
 };
 
-const locations = [
-    { name: "Dhaka, Bangladesh", latitude: 23.8103, longitude: 90.4125, timezone: "Asia/Dhaka" },
-    { name: "London, UK", latitude: 51.5074, longitude: -0.1278, timezone: "Europe/London" },
-    { name: "New York, USA", latitude: 40.7128, longitude: -74.0060, timezone: "America/New_York" },
-    { name: "Cairo, Egypt", latitude: 30.0444, longitude: 31.2357, timezone: "Africa/Cairo" },
-    { name: "Mecca, Saudi Arabia", latitude: 21.4225, longitude: 39.8262, timezone: "Asia/Riyadh"},
-];
-
 const formatTo12Hour = (time: string, locale: string = 'en-US') => {
     if (!time) return "";
     const [hours, minutes] = time.split(':');
@@ -52,8 +37,8 @@ export default function PrayerTimesClient() {
   const [nextPrayerIndex, setNextPrayerIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState(locations[0]);
-  const [timezone, setTimezone] = useState<string>(locations[0].timezone);
+  const [timezone, setTimezone] = useState<string>("");
+  const { location } = useLocation();
   const { t, language } = useLanguage();
 
   const prayerNameMapping: { [key: string]: string } = useMemo(() => ({
@@ -66,10 +51,12 @@ export default function PrayerTimesClient() {
 
   useEffect(() => {
     const fetchPrayerTimes = async () => {
+        if (!location) return;
+
         setIsLoading(true);
         setError(null);
         try {
-            const { latitude, longitude } = selectedLocation;
+            const { latitude, longitude } = location;
             const date = new Date();
             const prayerRes = await fetch(`https://api.aladhan.com/v1/timings/${date.getTime()/1000}?latitude=${latitude}&longitude=${longitude}&method=2`);
             if (!prayerRes.ok) {
@@ -99,7 +86,7 @@ export default function PrayerTimesClient() {
     };
 
     fetchPrayerTimes();
-  }, [selectedLocation]);
+  }, [location]);
   
   useEffect(() => {
     if (prayerTimes.length === 0) return;
@@ -128,37 +115,13 @@ export default function PrayerTimesClient() {
     return () => clearInterval(timer);
   }, [prayerTimes]);
 
-  const handleLocationChange = (value: string) => {
-    const location = locations.find(l => l.name === value);
-    if(location) {
-        setSelectedLocation(location);
-    }
-  }
-
   return (
     <div className="space-y-6">
-       <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2"><MapPin />{t('location')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-           <Select onValueChange={handleLocationChange} defaultValue={selectedLocation.name}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('select_location')} />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map(loc => (
-                    <SelectItem key={loc.name} value={loc.name}>{loc.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-        </CardContent>
-      </Card>
-
       {isLoading && (
          <div className="flex items-center justify-center h-48">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="ml-4 text-lg text-muted-foreground">{t('fetching_prayer_times_for').replace('{location}', selectedLocation.name)}</p>
+            <p className="ml-4 text-lg text-muted-foreground">{t('fetching_prayer_times_for').replace('{location}', location?.name || '...')}
+            </p>
         </div>
       )}
 
@@ -170,17 +133,15 @@ export default function PrayerTimesClient() {
         </Alert>
       )}
 
-      {!isLoading && !error && (
+      {!isLoading && !error && location && (
         <>
-            <NextPrayerCard />
-
             <Card>
                 <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle className="font-headline text-2xl text-primary">
                         {t('todays_prayer_times')}
                     </CardTitle>
                     <div className="text-right">
-                        <p className="text-sm text-muted-foreground">{selectedLocation.name}</p>
+                        <p className="text-sm font-semibold">{location.name}</p>
                         <p className="text-xs text-muted-foreground">{timezone.replace(/_/g, " ")}</p>
                     </div>
                 </CardHeader>

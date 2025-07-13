@@ -6,17 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/context/language-context";
+import { useLocation } from "@/context/location-context";
 
 interface PrayerTime {
   name: string;
   time: string;
-}
-
-interface Location {
-    name: string;
-    latitude: number;
-    longitude: number;
-    timezone: string;
 }
 
 const formatTo12Hour = (time: string, locale: string = 'en-US') => {
@@ -33,7 +27,7 @@ export default function NextPrayerCard() {
   const [countdown, setCountdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [location, setLocation] = useState<Location | null>(null);
+  const { location } = useLocation();
   const { t, language } = useLanguage();
 
   const prayerNameMapping: { [key: string]: string } = useMemo(() => ({
@@ -45,27 +39,14 @@ export default function NextPrayerCard() {
   }), [t]);
 
   useEffect(() => {
-    const fetchPrayerTimesForIP = async () => {
+    const fetchPrayerTimes = async () => {
+        if (!location) return;
+
         setIsLoading(true);
         setError(null);
         try {
-            // Fetch location from IP
-            const ipRes = await fetch(`https://ipapi.co/json/`);
-            if (!ipRes.ok) {
-                throw new Error("Failed to fetch location from IP.");
-            }
-            const ipData = await ipRes.json();
-            const currentLoc = {
-              name: `${ipData.city}, ${ipData.country_name}`,
-              latitude: ipData.latitude,
-              longitude: ipData.longitude,
-              timezone: ipData.timezone,
-            };
-            setLocation(currentLoc);
-
-            // Fetch prayer times
             const date = new Date();
-            const prayerRes = await fetch(`https://api.aladhan.com/v1/timings/${date.getTime()/1000}?latitude=${currentLoc.latitude}&longitude=${currentLoc.longitude}&method=2`);
+            const prayerRes = await fetch(`https://api.aladhan.com/v1/timings/${date.getTime()/1000}?latitude=${location.latitude}&longitude=${location.longitude}&method=2`);
             if (!prayerRes.ok) {
                 throw new Error('Failed to fetch prayer times.');
             }
@@ -85,14 +66,12 @@ export default function NextPrayerCard() {
 
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unknown error occurred.");
-            // Fallback to Dhaka if IP lookup fails
-            setLocation({ name: "Dhaka, Bangladesh", latitude: 23.8103, longitude: 90.4125, timezone: "Asia/Dhaka" });
         } finally {
             setIsLoading(false);
         }
     };
-    fetchPrayerTimesForIP();
-  }, []);
+    fetchPrayerTimes();
+  }, [location]);
   
   useEffect(() => {
     if (prayerTimes.length === 0) return;
@@ -161,7 +140,7 @@ export default function NextPrayerCard() {
     );
   }
 
-  if (!nextPrayer) return null;
+  if (!nextPrayer || !location) return null;
 
   return (
     <Card className="shadow-lg">
@@ -169,7 +148,7 @@ export default function NextPrayerCard() {
           <CardTitle className="font-headline text-center text-3xl text-primary">
           {t('next_prayer').replace('{prayer}', prayerNameMapping[nextPrayer.name]).replace('{time}', formatTo12Hour(nextPrayer.time, language))}
           </CardTitle>
-          <p className="text-center text-sm text-muted-foreground -mt-2">{location?.name}</p>
+          <p className="text-center text-sm text-muted-foreground -mt-2">{location.name}</p>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center">
           <div className="text-6xl font-bold font-mono text-accent tracking-widest">

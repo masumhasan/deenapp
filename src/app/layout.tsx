@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/context/theme-context';
 import MainLayout from '@/components/main-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/context/language-context';
+import { LocationProvider } from '@/context/location-context';
 
 export const metadata: Metadata = {
   title: 'DeenStream',
@@ -31,10 +32,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <LanguageProvider>
-          <ThemeProvider>
-            <MainLayout>{children}</MainLayout>
-            <Toaster />
-          </ThemeProvider>
+          <LocationProvider>
+            <ThemeProvider>
+              <MainLayout>{children}</MainLayout>
+              <Toaster />
+            </ThemeProvider>
+          </LocationProvider>
         </LanguageProvider>
       </body>
     </html>

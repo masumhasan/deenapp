@@ -14,6 +14,7 @@ import {
   Repeat,
   Sparkles,
   Languages,
+  MapPin,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +35,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLocation } from "@/context/location-context";
+import type { Location } from "@/context/location-context";
 
 
 function NavContent() {
@@ -99,6 +102,7 @@ export default function MainLayout({
 }) {
   const { isRamadanMode, toggleRamadanMode } = useTheme();
   const { language, setLanguage } = useLanguage();
+  const { location, setLocation, locations } = useLocation();
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -127,6 +131,30 @@ export default function MainLayout({
           <div className="w-full flex-1">
             {/* Can add a search bar here later */}
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MapPin className="h-5 w-5" />
+                <span className="sr-only">Change Location</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuRadioGroup
+                value={location.name}
+                onValueChange={(value) => {
+                  const newLocation = locations.find(l => l.name === value);
+                  if (newLocation) {
+                    setLocation(newLocation);
+                  }
+                }}
+              >
+                {locations.map((loc: Location) => (
+                    <DropdownMenuRadioItem key={loc.name} value={loc.name}>{loc.name}</DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
