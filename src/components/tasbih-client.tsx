@@ -4,12 +4,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RotateCcw, Target } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/context/language-context";
 
 export default function TasbihClient() {
   const [count, setCount] = useState(0);
   const [dhikr, setDhikr] = useState("SubhanAllah");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const savedCount = localStorage.getItem("tasbihCount");
@@ -55,7 +57,7 @@ export default function TasbihClient() {
              <Input 
                 value={dhikr}
                 onChange={handleDhikrChange}
-                placeholder="Type your dhikr..."
+                placeholder={t('type_your_dhikr')}
                 className="text-center text-lg font-headline"
             />
             <div className="flex justify-center gap-4">
@@ -65,7 +67,7 @@ export default function TasbihClient() {
                 onClick={handleReset}
                 className="flex-1"
               >
-                <RotateCcw className="mr-2 h-5 w-5" /> Reset
+                <RotateCcw className="mr-2 h-5 w-5" /> {t('reset')}
               </Button>
             </div>
           </div>

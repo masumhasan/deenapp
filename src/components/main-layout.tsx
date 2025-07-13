@@ -13,6 +13,7 @@ import {
   Landmark,
   Repeat,
   Sparkles,
+  Languages,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -25,19 +26,30 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/context/language-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const navItems = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/prayer-times", label: "Prayer Times", icon: Landmark },
-  { href: "/quran", label: "Quran", icon: BookOpen },
-  { href: "/duas", label: "Duas", icon: HandHeart },
-  { href: "/tasbih", label: "Tasbih", icon: Repeat },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/assistant", label: "AI Assistant", icon: Sparkles },
-];
 
 function NavContent() {
   const pathname = usePathname();
+  const { t } = useLanguage();
+  
+  const navItems = [
+    { href: "/", label: t('home'), icon: Home },
+    { href: "/prayer-times", label: t('prayer_times'), icon: Landmark },
+    { href: "/quran", label: t('quran_reader'), icon: BookOpen },
+    { href: "/duas", label: t('dua_library'), icon: HandHeart },
+    { href: "/tasbih", label: t('tasbih_counter'), icon: Repeat },
+    { href: "/calendar", label: t('hijri_calendar'), icon: Calendar },
+    { href: "/assistant", label: t('ai_assistant'), icon: Sparkles },
+  ];
+
   return (
     <nav className="flex flex-col gap-4 p-4">
       <Link href="/" className="flex items-center gap-2 mb-4">
@@ -86,6 +98,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const { isRamadanMode, toggleRamadanMode } = useTheme();
+  const { language, setLanguage } = useLanguage();
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -114,6 +127,26 @@ export default function MainLayout({
           <div className="w-full flex-1">
             {/* Can add a search bar here later */}
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Languages className="h-5 w-5" />
+                <span className="sr-only">Change Language</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuRadioGroup
+                value={language}
+                onValueChange={(value) => setLanguage(value as 'bn' | 'en' | 'hi')}
+              >
+                <DropdownMenuRadioItem value="bn">বাংলা</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="hi">हिंदी</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <div className="flex items-center gap-2">
             <Moon className="h-5 w-5" />
             <Label htmlFor="ramadan-mode" className="sr-only">

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Sunrise, Sun, Sunset, Moon, Bell, Loader2, AlertCircle, MapPin } from "lucide-react";
 import {
@@ -14,6 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useLanguage } from "@/context/language-context";
 
 interface PrayerTime {
   name: string;
@@ -21,7 +22,7 @@ interface PrayerTime {
   icon: React.ElementType;
 }
 
-const prayerIcons = {
+const prayerIcons: { [key: string]: React.ElementType } = {
   Fajr: Sunrise,
   Dhuhr: Sun,
   Asr: Sun,
@@ -38,12 +39,12 @@ const locations = [
     { name: "Mecca, Saudi Arabia", latitude: 21.4225, longitude: 39.8262, timezone: "Asia/Riyadh"},
 ];
 
-const formatTo12Hour = (time: string) => {
+const formatTo12Hour = (time: string, locale: string = 'en-US') => {
     if (!time) return "";
-    const [hours, minutes] = time.split(':').map(Number);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hours12 = hours % 12 || 12;
-    return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+    return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true });
 };
 
 export default function PrayerTimesClient() {
@@ -54,7 +55,15 @@ export default function PrayerTimesClient() {
   const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState(locations[0]);
   const [timezone, setTimezone] = useState<string>(locations[0].timezone);
+  const { t, language } = useLanguage();
 
+  const prayerNameMapping: { [key: string]: string } = useMemo(() => ({
+    Fajr: t('fajr'),
+    Dhuhr: t('dhuhr'),
+    Asr: t('asr'),
+    Maghrib: t('maghrib'),
+    Isha: t('isha'),
+  }), [t]);
 
   useEffect(() => {
     const fetchPrayerTimes = async () => {
@@ -149,12 +158,12 @@ export default function PrayerTimesClient() {
     <div className="space-y-6">
        <Card>
         <CardHeader>
-          <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2"><MapPin />Location</CardTitle>
+          <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2"><MapPin />{t('location')}</CardTitle>
         </CardHeader>
         <CardContent>
            <Select onValueChange={handleLocationChange} defaultValue={selectedLocation.name}>
               <SelectTrigger>
-                <SelectValue placeholder="Select Location" />
+                <SelectValue placeholder={t('select_location')} />
               </SelectTrigger>
               <SelectContent>
                 {locations.map(loc => (
@@ -168,14 +177,14 @@ export default function PrayerTimesClient() {
       {isLoading && (
          <div className="flex items-center justify-center h-48">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="ml-4 text-lg text-muted-foreground">Fetching prayer times for {selectedLocation.name}...</p>
+            <p className="ml-4 text-lg text-muted-foreground">{t('fetching_prayer_times_for').replace('{location}', selectedLocation.name)}</p>
         </div>
       )}
 
       {error && (
         <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
+            <AlertTitle>{t('error')}</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -186,14 +195,14 @@ export default function PrayerTimesClient() {
                 <Card className="shadow-lg">
                 <CardHeader>
                     <CardTitle className="font-headline text-center text-3xl text-primary">
-                    Next Prayer: {nextPrayer.name} at {formatTo12Hour(nextPrayer.time)}
+                    {t('next_prayer').replace('{prayer}', prayerNameMapping[nextPrayer.name]).replace('{time}', formatTo12Hour(nextPrayer.time, language))}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center">
                     <div className="text-6xl font-bold font-mono text-accent tracking-widest">
                     {countdown}
                     </div>
-                    <p className="text-muted-foreground mt-2">until next Salah</p>
+                    <p className="text-muted-foreground mt-2">{t('until_next_salah')}</p>
                 </CardContent>
                 </Card>
             )}
@@ -201,7 +210,7 @@ export default function PrayerTimesClient() {
             <Card>
                 <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle className="font-headline text-2xl text-primary">
-                        Today's Prayer Times
+                        {t('todays_prayer_times')}
                     </CardTitle>
                     <div className="text-right">
                         <p className="text-sm text-muted-foreground">{selectedLocation.name}</p>
@@ -225,11 +234,11 @@ export default function PrayerTimesClient() {
                             index === nextPrayerIndex ? "text-accent" : "text-primary"
                             }`}
                         />
-                        <span className="font-semibold text-lg">{prayer.name}</span>
+                        <span className="font-semibold text-lg">{prayerNameMapping[prayer.name]}</span>
                         </div>
                         <div className="flex items-center gap-4">
                         <span className="font-mono text-lg font-bold text-foreground">
-                            {formatTo12Hour(prayer.time)}
+                            {formatTo12Hour(prayer.time, language)}
                         </span>
                         <Button variant="ghost" size="icon">
                             <Bell className="h-5 w-5 text-muted-foreground" />
@@ -243,31 +252,31 @@ export default function PrayerTimesClient() {
             
             <Card>
                 <CardHeader>
-                <CardTitle className="font-headline text-2xl text-primary">Settings</CardTitle>
+                <CardTitle className="font-headline text-2xl text-primary">{t('settings')}</CardTitle>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="madhhab" className="font-semibold">Madhhab</Label>
+                    <Label htmlFor="madhhab" className="font-semibold">{t('madhhab')}</Label>
                     <Select defaultValue="shafi">
                     <SelectTrigger id="madhhab">
                         <SelectValue placeholder="Select Madhhab" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="shafi">Shafi'i (Standard)</SelectItem>
-                        <SelectItem value="hanafi">Hanafi</SelectItem>
+                        <SelectItem value="shafi">{t('shafii_standard')}</SelectItem>
+                        <SelectItem value="hanafi">{t('hanafi')}</SelectItem>
                     </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="calculation" className="font-semibold">Calculation Method</Label>
+                    <Label htmlFor="calculation" className="font-semibold">{t('calculation_method')}</Label>
                     <Select defaultValue="2">
                     <SelectTrigger id="calculation">
                         <SelectValue placeholder="Select Method" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="2">Muslim World League</SelectItem>
-                        <SelectItem value="4">ISNA (North America)</SelectItem>
-                        <SelectItem value="5">Egyptian General Authority</SelectItem>
+                        <SelectItem value="2">{t('muslim_world_league')}</SelectItem>
+                        <SelectItem value="4">{t('isna_north_america')}</SelectItem>
+                        <SelectItem value="5">{t('egyptian_general_authority')}</SelectItem>
                     </SelectContent>
                     </Select>
                 </div>

@@ -3,6 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/context/theme-context';
 import MainLayout from '@/components/main-layout';
 import { Toaster } from '@/components/ui/toaster';
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: 'DeenStream',
@@ -24,15 +25,17 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider>
-          <MainLayout>{children}</MainLayout>
-          <Toaster />
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <MainLayout>{children}</MainLayout>
+            <Toaster />
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -18,6 +18,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Sparkles } from "lucide-react";
+import { useLanguage } from "@/context/language-context";
 
 const formSchema = z.object({
   query: z.string().min(10, "Please ask a more detailed question.").max(500),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 export default function AssistantClient() {
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,7 +55,7 @@ export default function AssistantClient() {
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-2xl text-primary">
-            Ask a Question
+            {t('ask_a_question')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -64,10 +66,10 @@ export default function AssistantClient() {
                 name="query"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Question about Fiqh</FormLabel>
+                    <FormLabel>{t('your_question_about_fiqh')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="e.g., What are the conditions for a valid prayer?"
+                        placeholder={t('question_placeholder')}
                         className="resize-none"
                         rows={4}
                         {...field}
@@ -81,12 +83,12 @@ export default function AssistantClient() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Getting Answer...
+                    {t('getting_answer')}
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Ask Assistant
+                    {t('ask_assistant')}
                   </>
                 )}
               </Button>
@@ -99,7 +101,7 @@ export default function AssistantClient() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl text-primary">
-              Answer
+              {t('answer')}
             </CardTitle>
           </CardHeader>
           <CardContent>

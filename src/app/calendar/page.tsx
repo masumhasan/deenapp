@@ -1,22 +1,28 @@
+
+"use client";
+
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/context/language-context";
 import { Star } from "lucide-react";
 
-const islamicEvents = [
-  { name: "Ramadan Start", date: "Around March 11, 2024" },
-  { name: "Laylat al-Qadr", date: "Last 10 nights of Ramadan" },
-  { name: "Eid al-Fitr", date: "Around April 10, 2024" },
-  { name: "Day of Arafah", date: "Around June 15, 2024" },
-  { name: "Eid al-Adha", date: "Around June 16, 2024" },
-  { name: "Islamic New Year", date: "Around July 7, 2024" },
-  { name: "Day of Ashura", date: "Around July 16, 2024" },
-];
-
 export default function CalendarPage() {
+  const { t } = useLanguage();
+
+  const islamicEvents = [
+    { name: t('ramadan_start'), date: "Around March 11, 2024" },
+    { name: t('laylat_al_qadr'), date: "Last 10 nights of Ramadan" },
+    { name: t('eid_al_fitr'), date: "Around April 10, 2024" },
+    { name: t('day_of_arafah'), date: "Around June 15, 2024" },
+    { name: t('eid_al_adha'), date: "Around June 16, 2024" },
+    { name: t('islamic_new_year'), date: "Around July 7, 2024" },
+    { name: t('day_of_ashura'), date: "Around July 16, 2024" },
+  ];
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-headline font-bold text-primary">
-        Hijri Calendar
+        {t('hijri_calendar')}
       </h1>
       <div className="grid md:grid-cols-2 gap-8">
         <Card className="shadow-lg flex flex-col items-center justify-center p-4">
@@ -29,7 +35,7 @@ export default function CalendarPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl text-primary">
-              Important Islamic Events
+              {t('important_islamic_events')}
             </CardTitle>
           </CardHeader>
           <CardContent>

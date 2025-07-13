@@ -1,3 +1,6 @@
+
+"use client";
+
 import {
   Accordion,
   AccordionContent,
@@ -13,29 +16,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/context/language-context";
 import { PlayCircle, Bookmark } from "lucide-react";
 
 export default function QuranPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-3xl font-headline font-bold text-primary">
-          Quran Reader
+          {t('quran_reader')}
         </h1>
         <div className="flex gap-2">
           <Select defaultValue="1">
             <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Select Surah" />
+              <SelectValue placeholder={t('select_surah')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">1. Al-Fatihah</SelectItem>
-              <SelectItem value="2">2. Al-Baqarah</SelectItem>
-              <SelectItem value="18">18. Al-Kahf</SelectItem>
+              <SelectItem value="1">1. {t('al_fatihah')}</SelectItem>
+              <SelectItem value="2">2. {t('al_baqarah')}</SelectItem>
+              <SelectItem value="18">18. {t('al_kahf')}</SelectItem>
             </SelectContent>
           </Select>
           <Select defaultValue="1">
             <SelectTrigger className="w-full md:w-[150px]">
-              <SelectValue placeholder="Select Ayah" />
+              <SelectValue placeholder={t('select_ayah')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="1">Ayah 1</SelectItem>
@@ -50,7 +56,7 @@ export default function QuranPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="font-headline text-2xl text-primary">
-              Al-Fatihah (The Opening)
+              {t('al_fatihah')} (The Opening)
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon">
@@ -90,7 +96,7 @@ export default function QuranPage() {
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-headline text-lg">
-                View Tafsir (Ibn Kathir)
+                {t('view_tafsir')}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
                 <p>
