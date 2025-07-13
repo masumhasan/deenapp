@@ -192,6 +192,9 @@ export default function MainLayout({
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
           {children}
         </main>
+         <footer className="text-center p-4 text-sm text-muted-foreground border-t">
+          © {new Date().getFullYear()} <a href="https://masumhasan.github.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Nur Hasan Masum</a>. All rights reserved.
+        </footer>
       </div>
     </div>
   );
