@@ -106,6 +106,7 @@ export default function PrayerTimesClient() {
       }
 
       if (nextPrayerIdx === -1) {
+          // If all prayers for today are done, the next prayer is Fajr of the next day
           nextPrayerIdx = 0;
       }
       setNextPrayerIndex(nextPrayerIdx);
@@ -115,70 +116,71 @@ export default function PrayerTimesClient() {
     return () => clearInterval(timer);
   }, [prayerTimes]);
 
-  return (
-    <div className="space-y-6">
-      {isLoading && (
-         <div className="flex items-center justify-center h-48">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="ml-4 text-lg text-muted-foreground">{t('fetching_prayer_times_for').replace('{location}', location?.name || '...')}
-            </p>
-        </div>
-      )}
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-4 text-lg text-muted-foreground">{t('fetching_prayer_times_for').replace('{location}', location?.name || '...')}</p>
+    </div>
+    )
+  }
 
-      {error && (
+  if (error) {
+    return (
         <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>{t('error')}</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
         </Alert>
-      )}
+    )
+  }
+  
+  if (!location) return null;
 
-      {!isLoading && !error && location && (
-        <>
-            <Card>
-                <CardHeader className="flex flex-row justify-between items-center">
-                    <CardTitle className="font-headline text-2xl text-primary">
-                        {t('todays_prayer_times')}
-                    </CardTitle>
-                    <div className="text-right">
-                        <p className="text-sm font-semibold">{location.name}</p>
-                        <p className="text-xs text-muted-foreground">{timezone.replace(/_/g, " ")}</p>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                <ul className="space-y-4">
-                    {prayerTimes.map((prayer, index) => (
-                    <li
-                        key={prayer.name}
-                        className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-                        index === nextPrayerIndex
-                            ? "bg-accent/20 border-l-4 border-accent"
-                            : "bg-card hover:bg-muted"
-                        }`}
-                    >
-                        <div className="flex items-center gap-4">
-                        <prayer.icon
-                            className={`h-6 w-6 ${
-                            index === nextPrayerIndex ? "text-accent" : "text-primary"
-                            }`}
-                        />
-                        <span className="font-semibold text-lg">{prayerNameMapping[prayer.name]}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                        <span className="font-mono text-lg font-bold text-foreground">
-                            {formatTo12Hour(prayer.time, language)}
-                        </span>
-                        <Button variant="ghost" size="icon">
-                            <Bell className="h-5 w-5 text-muted-foreground" />
-                        </Button>
-                        </div>
-                    </li>
-                    ))}
-                </ul>
-                </CardContent>
-            </Card>
-        </>
-      )}
+  return (
+    <div className="space-y-6">
+      <Card>
+          <CardHeader className="flex flex-row justify-between items-center">
+              <CardTitle className="font-headline text-2xl text-primary">
+                  {t('todays_prayer_times')}
+              </CardTitle>
+              <div className="text-right">
+                  <p className="text-sm font-semibold">{location.name}</p>
+                  <p className="text-xs text-muted-foreground">{timezone.replace(/_/g, " ")}</p>
+              </div>
+          </CardHeader>
+          <CardContent>
+          <ul className="space-y-4">
+              {prayerTimes.map((prayer, index) => (
+              <li
+                  key={prayer.name}
+                  className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+                  index === nextPrayerIndex
+                      ? "bg-accent/20 border-l-4 border-accent"
+                      : "bg-card hover:bg-muted"
+                  }`}
+              >
+                  <div className="flex items-center gap-4">
+                  <prayer.icon
+                      className={`h-6 w-6 ${
+                      index === nextPrayerIndex ? "text-accent" : "text-primary"
+                      }`}
+                  />
+                  <span className="font-semibold text-lg">{prayerNameMapping[prayer.name]}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                  <span className="font-mono text-lg font-bold text-foreground">
+                      {formatTo12Hour(prayer.time, language)}
+                  </span>
+                  <Button variant="ghost" size="icon">
+                      <Bell className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                  </div>
+              </li>
+              ))}
+          </ul>
+          </CardContent>
+      </Card>
     </div>
   );
 }
