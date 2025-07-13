@@ -163,7 +163,7 @@ export default function PrayerTimesClient() {
                   <div className="flex items-center gap-4">
                   <prayer.icon
                       className={`h-6 w-6 ${
-                      index === nextPrayerIndex ? "text-accent" : "text-primary"
+                      index === nextPrayerIndex ? "text-accent animate-pulse" : "text-primary"
                       }`}
                   />
                   <span className="font-semibold text-lg">{prayerNameMapping[prayer.name]}</span>
