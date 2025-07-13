@@ -29,7 +29,7 @@ export default function Home() {
       description: t('view_daily_prayer_schedules'),
       href: "/prayer-times",
       icon: Landmark,
-      bgColor: "bg-green-500",
+      bgColor: "bg-gradient-to-br from-green-400 to-green-600",
       iconColor: "text-white",
     },
     {
@@ -37,7 +37,7 @@ export default function Home() {
       description: t('explore_the_holy_quran'),
       href: "/quran",
       icon: BookOpen,
-      bgColor: "bg-blue-500",
+      bgColor: "bg-gradient-to-br from-blue-400 to-blue-600",
       iconColor: "text-white",
     },
     {
@@ -45,7 +45,7 @@ export default function Home() {
       description: t('find_supplications_for_any_occasion'),
       href: "/duas",
       icon: HandHeart,
-      bgColor: "bg-yellow-500",
+      bgColor: "bg-gradient-to-br from-yellow-400 to-orange-500",
       iconColor: "text-white",
     },
     {
@@ -53,7 +53,7 @@ export default function Home() {
       description: t('track_your_dhikr_and_tasbih'),
       href: "/tasbih",
       icon: Repeat,
-      bgColor: "bg-indigo-500",
+      bgColor: "bg-gradient-to-br from-indigo-400 to-indigo-600",
       iconColor: "text-white",
     },
     {
@@ -61,7 +61,7 @@ export default function Home() {
       description: t('follow_the_islamic_calendar'),
       href: "/calendar",
       icon: Calendar,
-      bgColor: "bg-purple-500",
+      bgColor: "bg-gradient-to-br from-purple-400 to-purple-600",
       iconColor: "text-white",
     },
     {
@@ -69,7 +69,7 @@ export default function Home() {
       description: t('ask_questions_about_fiqh'),
       href: "/assistant",
       icon: Sparkles,
-      bgColor: "bg-pink-500",
+      bgColor: "bg-gradient-to-br from-pink-400 to-rose-500",
       iconColor: "text-white",
     },
   ];
@@ -94,7 +94,7 @@ export default function Home() {
             <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-transform duration-300 ease-in-out bg-card/80">
               <CardHeader className="flex flex-row items-center gap-4">
                 <div
-                  className={`p-3 rounded-full ${feature.bgColor}`}
+                  className={`p-3 rounded-full bg-gradient-to-br ${feature.bgColor}`}
                 >
                   <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
                 </div>
