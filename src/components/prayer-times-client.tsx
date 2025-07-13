@@ -24,6 +24,13 @@ const prayerTimesData = [
 
 const nextPrayerIndex = 2; // Mock: Asr is the next prayer
 
+const formatTo12Hour = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours % 12 || 12; // Convert 0 to 12
+    return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+};
+
 export default function PrayerTimesClient() {
   const [countdown, setCountdown] = useState("");
 
@@ -98,7 +105,7 @@ export default function PrayerTimesClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="font-mono text-lg font-bold text-foreground">
-                    {prayer.time}
+                    {formatTo12Hour(prayer.time)}
                   </span>
                   <Button variant="ghost" size="icon">
                     <Bell className="h-5 w-5 text-muted-foreground" />

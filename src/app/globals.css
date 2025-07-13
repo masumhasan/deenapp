@@ -8,25 +8,25 @@ body {
 
 @layer base {
   :root {
-    --background: 60 56% 92%;
-    --foreground: 157 20% 15%;
-    --card: 60 56% 97%;
-    --card-foreground: 157 20% 15%;
-    --popover: 60 56% 97%;
-    --popover-foreground: 157 20% 15%;
-    --primary: 157 37% 30%;
-    --primary-foreground: 60 56% 97%;
-    --secondary: 157 15% 85%;
-    --secondary-foreground: 157 37% 20%;
-    --muted: 157 15% 85%;
-    --muted-foreground: 157 15% 45%;
-    --accent: 43 74% 49%;
-    --accent-foreground: 43 100% 10%;
+    --background: 0 0% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 217 89% 61%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 5 69% 53%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 157 15% 80%;
-    --input: 157 15% 88%;
-    --ring: 157 37% 30%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 89% 61%;
     --radius: 0.8rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -44,25 +44,25 @@ body {
   }
 
   .dark {
-    --background: 157 20% 10%;
-    --foreground: 60 56% 92%;
-    --card: 157 20% 12%;
-    --card-foreground: 60 56% 92%;
-    --popover: 157 20% 10%;
-    --popover-foreground: 60 56% 92%;
-    --primary: 157 37% 70%;
-    --primary-foreground: 157 37% 10%;
-    --secondary: 157 15% 20%;
-    --secondary-foreground: 60 56% 92%;
-    --muted: 157 15% 20%;
-    --muted-foreground: 157 15% 65%;
-    --accent: 43 74% 60%;
-    --accent-foreground: 43 100% 10%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 89% 61%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 5 69% 53%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 157 15% 20%;
-    --input: 157 15% 22%;
-    --ring: 157 37% 70%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 89% 61%;
   }
 
   .ramadan-mode {
