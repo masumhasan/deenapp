@@ -120,13 +120,13 @@ export default function Home() {
               onClick={() => setIsWuduSettingsOpen(true)}
             >
               <Card className="h-full w-full hover:shadow-xl hover:-translate-y-1 transition-transform duration-300 ease-in-out bg-card/80">
-                <CardHeader className="flex flex-row items-center gap-4 text-left">
+                <CardHeader className="flex flex-row items-center gap-4">
                   <div
                     className={`p-3 rounded-full bg-gradient-to-br ${feature.bgColor}`}
                   >
                     <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
                   </div>
-                  <div>
+                  <div className="text-left">
                     <CardTitle className="font-headline text-xl text-primary group-hover:text-accent">
                       {feature.title}
                     </CardTitle>
@@ -146,7 +146,7 @@ export default function Home() {
                   >
                     <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
                   </div>
-                  <div>
+                  <div className="text-left">
                     <CardTitle className="font-headline text-xl text-primary group-hover:text-accent">
                       {feature.title}
                     </CardTitle>
