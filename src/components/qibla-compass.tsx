@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, LocateFixed } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import { cn } from '@/lib/utils';
 
 const KAABA_LAT = 21.422487;
 const KAABA_LON = 39.826206;
@@ -96,7 +97,7 @@ export default function QiblaCompass() {
 
   if (isLoading) {
     return (
-        <Card className="w-80 h-80 flex flex-col items-center justify-center text-center p-4 bg-card/50 shadow-2xl rounded-full">
+        <Card className="w-80 h-80 flex flex-col items-center justify-center text-center p-4 bg-card/50 shadow-2xl rounded-full border-none">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">{t('requesting_permissions')}</p>
         </Card>
@@ -116,53 +117,71 @@ export default function QiblaCompass() {
   }
 
   const qiblaRelativeRotation = qiblaDirection !== null && heading !== null ? qiblaDirection - heading : 0;
+  
+  const Ticks = () => (
+    <div className="absolute w-full h-full" style={{
+        background: `conic-gradient(
+            from -90deg, 
+            hsl(var(--foreground)) 0.25deg, 
+            transparent 0.25deg 29.75deg,
+            hsl(var(--muted-foreground)) 30deg,
+            transparent 30.25deg 89.75deg,
+            hsl(var(--foreground)) 90deg,
+            transparent 90.25deg 119.75deg,
+            hsl(var(--muted-foreground)) 120deg,
+            transparent 120.25deg 179.75deg,
+            hsl(var(--foreground)) 180deg,
+            transparent 180.25deg 209.75deg,
+            hsl(var(--muted-foreground)) 210deg,
+            transparent 210.25deg 269.75deg,
+            hsl(var(--foreground)) 270deg,
+            transparent 270.25deg 299.75deg,
+            hsl(var(--muted-foreground)) 300deg,
+            transparent 300.25deg 359.75deg,
+            hsl(var(--foreground)) 360deg
+        )`
+    }}/>
+  );
+
 
   return (
-    <div className="w-80 h-80 rounded-full flex items-center justify-center bg-card shadow-inner" style={{
-        background: 'radial-gradient(circle, hsl(var(--card)) 70%, hsl(var(--background)) 100%)'
-    }}>
-      <div 
-        className="relative w-[280px] h-[280px] rounded-full transition-transform duration-200 ease-linear shadow-2xl" 
-        style={{ transform: `rotate(${-heading}deg)` }}
-      >
-        {/* Compass background with ticks */}
-        <div className="absolute w-full h-full rounded-full bg-card/80 backdrop-blur-sm" style={{
-            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.2)'
-        }}>
-            {[...Array(36)].map((_, i) => (
-                <div key={`tick-${i}`} className="absolute w-full h-full" style={{ transform: `rotate(${i * 10}deg)` }}>
-                    <div className={`absolute top-0 left-1/2 h-4 w-px -translate-x-1/2 ${i % 9 === 0 ? 'bg-primary h-6' : i % 3 === 0 ? 'bg-foreground' : 'bg-muted-foreground/50'}`}></div>
-                </div>
-            ))}
-             {['N', 'E', 'S', 'W'].map((dir, i) => (
-                <div key={dir} className="absolute w-full h-full">
-                <span
-                    className="absolute left-1/2 -translate-x-1/2 font-bold text-lg text-primary"
-                    style={{ transform: `rotate(${i * 90}deg) translateY(-28px)` }}
-                >
-                    {dir}
-                </span>
-                </div>
-            ))}
-        </div>
-      </div>
-      
-      {/* Qibla Indicator Arrow - rotates relative to compass */}
-       <div
-        className="absolute w-80 h-80 flex justify-center transition-transform duration-200 ease-in-out"
-        style={{ transform: `rotate(${qiblaRelativeRotation}deg)` }}
+    <div className="relative w-80 h-80 rounded-full flex items-center justify-center bg-[#222] shadow-[inset_0_0_1.5rem_black,_0_0_1.5rem_black] p-4">
+        <Ticks />
+        <div 
+            className="relative w-[280px] h-[280px] rounded-full transition-transform duration-200 ease-linear bg-[#222] shadow-[inset_0_0_2rem_black]"
+            style={{ transform: `rotate(${-heading}deg)` }}
         >
-        <div className="w-0 h-0
-            border-l-[15px] border-l-transparent
-            border-r-[15px] border-r-transparent
-            border-b-[100px] border-b-accent drop-shadow-lg
-            absolute top-[30px]"
-        />
-        <LocateFixed className="w-10 h-10 text-accent-foreground absolute top-[115px] drop-shadow-lg" />
-      </div>
+            <div className='absolute w-full h-full rounded-full shadow-[0_0_3rem_black] bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0)_0%,_rgba(0,0,0,0.9)_100%)]' />
+            <div className='absolute w-full h-full rounded-full opacity-30 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.4)_0%,_rgba(255,255,255,0)_50%)]' />
 
-       {/* Center pin */}
-        <div className="absolute w-5 h-5 bg-accent rounded-full border-2 border-background shadow-md"></div>
+            <div className="absolute w-full h-full text-center flex items-center justify-center font-bold text-2xl text-primary" style={{transform: "rotate(0deg)"}}>
+                <span className='absolute top-3'>N</span>
+            </div>
+            <div className="absolute w-full h-full text-center flex items-center justify-center font-bold text-2xl text-foreground/80" style={{transform: "rotate(90deg)"}}>
+                <span className='absolute top-3'>E</span>
+            </div>
+             <div className="absolute w-full h-full text-center flex items-center justify-center font-bold text-2xl text-foreground/80" style={{transform: "rotate(180deg)"}}>
+                <span className='absolute top-3'>S</span>
+            </div>
+            <div className="absolute w-full h-full text-center flex items-center justify-center font-bold text-2xl text-foreground/80" style={{transform: "rotate(270deg)"}}>
+                <span className='absolute top-3'>W</span>
+            </div>
+
+            <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#111] shadow-[0_0_0.5rem_black]'/>
+        </div>
+        
+        <div
+            className="absolute w-80 h-80 flex justify-center transition-transform duration-200 ease-in-out"
+            style={{ transform: `rotate(${qiblaRelativeRotation}deg)` }}
+        >
+            <div className="w-0 h-0
+                border-l-[15px] border-l-transparent
+                border-r-[15px] border-r-transparent
+                border-b-[100px] border-b-accent drop-shadow-lg
+                absolute top-[18px]"
+            />
+            <LocateFixed className="w-8 h-8 text-accent-foreground absolute top-[100px] drop-shadow-lg" />
+        </div>
     </div>
   );
 }
