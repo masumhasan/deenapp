@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const prayerTimesData = [
   { name: "Fajr", time: "04:32", icon: Sunrise },
