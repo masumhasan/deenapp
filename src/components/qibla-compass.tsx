@@ -2,9 +2,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Compass, Loader2, LocateFixed, Triangle } from 'lucide-react';
+import { Loader2, LocateFixed } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 
 const KAABA_LAT = 21.422487;
@@ -40,49 +40,50 @@ export default function QiblaCompass() {
       newHeading = (event as any).webkitCompassHeading;
     }
     if (newHeading !== null) {
-      setHeading(360 - newHeading);
+      setHeading(newHeading);
     }
   };
 
   const requestPermissions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    try {
-        // Request location permission
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                const qibla = calculateQiblaDirection(latitude, longitude);
-                setQiblaDirection(qibla);
-                
-                // Now request orientation permission after getting location
-                if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-                    (DeviceOrientationEvent as any).requestPermission()
-                    .then((permissionState: string) => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                        } else {
-                            setError(t('motion_permission_denied'));
-                        }
-                    })
-                    .finally(() => setIsLoading(false));
-                } else {
-                    // For devices that don't need explicit permission
-                    window.addEventListener('deviceorientation', handleOrientation);
-                    setIsLoading(false);
-                }
-            },
-            (err) => {
-                setError(t('location_permission_denied'));
-                setIsLoading(false);
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
 
-    } catch (e: any) {
-        setError(e.message);
+    // Request Geolocation
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const qibla = calculateQiblaDirection(latitude, longitude);
+        setQiblaDirection(qibla);
+
+        // Geolocation successful, now request orientation
+        if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+          (DeviceOrientationEvent as any).requestPermission()
+            .then((permissionState: string) => {
+              if (permissionState === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+                setIsLoading(false);
+              } else {
+                setError(t('motion_permission_denied'));
+                setIsLoading(false);
+              }
+            })
+            .catch((e: Error) => {
+              setError(t('motion_permission_denied'));
+              setIsLoading(false);
+            });
+        } else {
+          // For devices that don't need explicit permission (e.g., Android)
+          window.addEventListener('deviceorientation', handleOrientation);
+          setIsLoading(false);
+        }
+      },
+      (err) => {
+        // Geolocation failed
+        setError(t('location_permission_denied'));
         setIsLoading(false);
-    }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   }, [t]);
 
   useEffect(() => {
@@ -92,9 +93,10 @@ export default function QiblaCompass() {
     };
   }, [requestPermissions]);
 
+
   if (isLoading) {
     return (
-        <Card className="w-80 h-80 flex flex-col items-center justify-center text-center p-4">
+        <Card className="w-80 h-80 flex flex-col items-center justify-center text-center p-4 bg-card/50 shadow-2xl rounded-full">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">{t('requesting_permissions')}</p>
         </Card>
@@ -113,50 +115,54 @@ export default function QiblaCompass() {
     );
   }
 
-  const finalRotation = heading !== null && qiblaDirection !== null ? heading - qiblaDirection : 0;
+  const qiblaRelativeRotation = qiblaDirection !== null && heading !== null ? qiblaDirection - heading : 0;
 
   return (
-    <Card className="w-80 h-80 rounded-full flex items-center justify-center p-4 shadow-2xl bg-card/50">
-      <div className="relative w-full h-full">
-        {/* Compass Background */}
-        <div
-          className="w-full h-full rounded-full transition-transform duration-500 ease-in-out"
-          style={{ transform: `rotate(${heading !== null ? -heading : 0}deg)` }}
-        >
-          {['N', 'E', 'S', 'W'].map((dir, i) => (
-            <div key={dir} className="absolute w-full h-full">
-              <span
-                className="absolute left-1/2 -top-1 -translate-x-1/2 font-bold text-lg text-primary"
-                style={{ transform: `rotate(${i * 90}deg) translateY(-130px)` }}
-              >
-                {dir}
-              </span>
-            </div>
-          ))}
-          {/* Compass ticks */}
-           {[...Array(36)].map((_, i) => (
-                <div key={i} className="absolute w-full h-full" style={{ transform: `rotate(${i * 10}deg)` }}>
-                    <div className={`absolute top-0 left-1/2 h-4 w-px -translate-x-1/2 ${i % 3 === 0 ? 'bg-foreground' : 'bg-muted-foreground/50'}`}></div>
+    <div className="w-80 h-80 rounded-full flex items-center justify-center bg-card shadow-inner" style={{
+        background: 'radial-gradient(circle, hsl(var(--card)) 70%, hsl(var(--background)) 100%)'
+    }}>
+      <div 
+        className="relative w-[280px] h-[280px] rounded-full transition-transform duration-200 ease-linear shadow-2xl" 
+        style={{ transform: `rotate(${-heading}deg)` }}
+      >
+        {/* Compass background with ticks */}
+        <div className="absolute w-full h-full rounded-full bg-card/80 backdrop-blur-sm" style={{
+            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.2)'
+        }}>
+            {[...Array(36)].map((_, i) => (
+                <div key={`tick-${i}`} className="absolute w-full h-full" style={{ transform: `rotate(${i * 10}deg)` }}>
+                    <div className={`absolute top-0 left-1/2 h-4 w-px -translate-x-1/2 ${i % 9 === 0 ? 'bg-primary h-6' : i % 3 === 0 ? 'bg-foreground' : 'bg-muted-foreground/50'}`}></div>
+                </div>
+            ))}
+             {['N', 'E', 'S', 'W'].map((dir, i) => (
+                <div key={dir} className="absolute w-full h-full">
+                <span
+                    className="absolute left-1/2 -translate-x-1/2 font-bold text-lg text-primary"
+                    style={{ transform: `rotate(${i * 90}deg) translateY(-28px)` }}
+                >
+                    {dir}
+                </span>
                 </div>
             ))}
         </div>
-
-        {/* Qibla Indicator */}
-        <div
-          className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-in-out"
-          style={{ transform: `rotate(${finalRotation}deg)` }}
-        >
-          <div className="relative w-full h-full flex items-center justify-center">
-            <div className="absolute top-0 w-12 h-1/2 flex flex-col items-center">
-                <LocateFixed className="w-10 h-10 text-accent drop-shadow-lg" />
-            </div>
-          </div>
-        </div>
-        
-         {/* Center dot */}
-        <div className="absolute top-1/2 left-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 bg-accent rounded-full border-2 border-background"></div>
-
       </div>
-    </Card>
+      
+      {/* Qibla Indicator Arrow - rotates relative to compass */}
+       <div
+        className="absolute w-80 h-80 flex justify-center transition-transform duration-200 ease-in-out"
+        style={{ transform: `rotate(${qiblaRelativeRotation}deg)` }}
+        >
+        <div className="w-0 h-0
+            border-l-[15px] border-l-transparent
+            border-r-[15px] border-r-transparent
+            border-b-[100px] border-b-accent drop-shadow-lg
+            absolute top-[30px]"
+        />
+        <LocateFixed className="w-10 h-10 text-accent-foreground absolute top-[115px] drop-shadow-lg" />
+      </div>
+
+       {/* Center pin */}
+        <div className="absolute w-5 h-5 bg-accent rounded-full border-2 border-background shadow-md"></div>
+    </div>
   );
 }
