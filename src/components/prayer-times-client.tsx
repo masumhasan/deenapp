@@ -52,7 +52,7 @@ export default function PrayerTimesClient() {
         setIsLoading(true);
         setError(null);
         try {
-            const ipRes = await fetch('http://ip-api.com/json');
+            const ipRes = await fetch('https://ip-api.com/json');
             if (!ipRes.ok) throw new Error("Could not determine your location.");
             const ipData = await ipRes.json();
             if (ipData.status !== 'success') {
