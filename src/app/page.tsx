@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import RamadanCard from "@/components/ramadan-card";
 import { useLanguage } from "@/context/language-context";
+import NextPrayerCard from "@/components/next-prayer-card";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -84,6 +85,7 @@ export default function Home() {
         </p>
       </div>
 
+      <NextPrayerCard />
       <RamadanCard />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

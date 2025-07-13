@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/context/language-context";
+import NextPrayerCard from "./next-prayer-card";
 
 interface PrayerTime {
   name: string;
@@ -50,7 +50,6 @@ const formatTo12Hour = (time: string, locale: string = 'en-US') => {
 export default function PrayerTimesClient() {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
   const [nextPrayerIndex, setNextPrayerIndex] = useState<number | null>(null);
-  const [countdown, setCountdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState(locations[0]);
@@ -119,27 +118,11 @@ export default function PrayerTimesClient() {
         }
       }
 
-      let nextPrayerTime: Date;
-      if (nextPrayerIdx !== -1) {
-        const [hours, minutes] = prayerTimes[nextPrayerIdx].time.split(':').map(Number);
-        nextPrayerTime = new Date();
-        nextPrayerTime.setHours(hours, minutes, 0, 0);
-        setNextPrayerIndex(nextPrayerIdx);
-      } else {
-        nextPrayerIdx = 0;
-        const [hours, minutes] = prayerTimes[0].time.split(':').map(Number);
-        nextPrayerTime = new Date();
-        nextPrayerTime.setDate(nextPrayerTime.getDate() + 1);
-        nextPrayerTime.setHours(hours, minutes, 0, 0);
-        setNextPrayerIndex(0);
+      if (nextPrayerIdx === -1) {
+          nextPrayerIdx = 0;
       }
-      
-      const diff = nextPrayerTime.getTime() - now.getTime();
-      const h = Math.floor(diff / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      setNextPrayerIndex(nextPrayerIdx);
 
-      setCountdown(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`);
     }, 1000);
 
     return () => clearInterval(timer);
@@ -151,8 +134,6 @@ export default function PrayerTimesClient() {
         setSelectedLocation(location);
     }
   }
-
-  const nextPrayer = nextPrayerIndex !== null ? prayerTimes[nextPrayerIndex] : null;
 
   return (
     <div className="space-y-6">
@@ -191,21 +172,7 @@ export default function PrayerTimesClient() {
 
       {!isLoading && !error && (
         <>
-            {nextPrayer && (
-                <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle className="font-headline text-center text-3xl text-primary">
-                    {t('next_prayer').replace('{prayer}', prayerNameMapping[nextPrayer.name]).replace('{time}', formatTo12Hour(nextPrayer.time, language))}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center">
-                    <div className="text-6xl font-bold font-mono text-accent tracking-widest">
-                    {countdown}
-                    </div>
-                    <p className="text-muted-foreground mt-2">{t('until_next_salah')}</p>
-                </CardContent>
-                </Card>
-            )}
+            <NextPrayerCard />
 
             <Card>
                 <CardHeader className="flex flex-row justify-between items-center">
@@ -247,39 +214,6 @@ export default function PrayerTimesClient() {
                     </li>
                     ))}
                 </ul>
-                </CardContent>
-            </Card>
-            
-            <Card>
-                <CardHeader>
-                <CardTitle className="font-headline text-2xl text-primary">{t('settings')}</CardTitle>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <Label htmlFor="madhhab" className="font-semibold">{t('madhhab')}</Label>
-                    <Select defaultValue="shafi">
-                    <SelectTrigger id="madhhab">
-                        <SelectValue placeholder="Select Madhhab" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="shafi">{t('shafii_standard')}</SelectItem>
-                        <SelectItem value="hanafi">{t('hanafi')}</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="calculation" className="font-semibold">{t('calculation_method')}</Label>
-                    <Select defaultValue="2">
-                    <SelectTrigger id="calculation">
-                        <SelectValue placeholder="Select Method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="2">{t('muslim_world_league')}</SelectItem>
-                        <SelectItem value="4">{t('isna_north_america')}</SelectItem>
-                        <SelectItem value="5">{t('egyptian_general_authority')}</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
                 </CardContent>
             </Card>
         </>
